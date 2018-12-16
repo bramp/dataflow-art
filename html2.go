@@ -12,9 +12,9 @@ import (
 )
 
 type record struct {
-	Key     string         `json:"key"`
-	Files   []string       `json:"files"`
-	Palette []palette.RGBA `json:"palette"`
+	Key      string           `json:"key"`
+	Files    []string         `json:"files"`
+	Palettes [][]palette.RGBA `json:"palettes"`
 }
 
 const tmplHtml = `
@@ -22,15 +22,32 @@ const tmplHtml = `
 	<head>
 		<style>
 			#container {}
-			img {
+			.palette {
 				vertical-align: middle;
+				display: inline-block;
+			}
+			.palette div {
+				width: 30px;
+				height: 30px;
+				display: inline-block;
 			}
 		</style>
 	</head>
 	<body>
 		<div id="container">
-			{{range .Records}}
-				<img src="output-final/{{$.Index}}/{{.Key}}.png" width=300> {{.Key}}<br />
+			{{range .Records -}}
+				<div class=row>
+					{{range .Palettes}}
+						{{if .}}
+							<div class=palette>
+							{{range . -}}
+								<div style="background-color: {{.Hex}}"></div>
+							{{- end}}
+							</div>
+						{{end}}
+					{{end}}
+				{{.Key}} ({{len .Files}} paintings)
+				</div>
 			{{- end}}
 		</div>
 	</body>
@@ -41,13 +58,13 @@ var (
 )
 
 func process(name string) {
-	fd, err := os.Open("output-final/" + name + "/index.json")
+	fd, err := os.Open(name + ".json")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer fd.Close()
 
-	var index map[string]record
+	var index []record
 
 	d := json.NewDecoder(fd)
 	if err := d.Decode(&index); err != nil {
@@ -90,5 +107,6 @@ func process(name string) {
 func main() {
 	process("artist")
 	process("style")
+	process("decade")
 	process("year")
 }

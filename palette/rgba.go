@@ -22,9 +22,14 @@ func (c RGBA) Int() int {
 	return rgbaToInt(c)
 }
 
+// Hex returns the HTML hex form, e.g "#001122".
+func (c RGBA) Hex() string {
+	return fmt.Sprintf(hexColorFormat, c.R, c.G, c.B)
+}
+
 // MarshalText marshals the color into its HTML hex form, e.g "#001122".
 func (c RGBA) MarshalText() ([]byte, error) {
-	return []byte(fmt.Sprintf(hexColorFormat, c.R, c.G, c.B)), nil
+	return []byte(c.Hex()), nil
 }
 
 // UnmarshalText unmarshal from HTML hex form to a color.Color.
